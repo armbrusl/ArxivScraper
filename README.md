@@ -1,5 +1,9 @@
 ### An easy way to scrape scientifc publication from Arxiv and visualize them
 
+
+![Alt Text](exampleNetwork.gif)
+
+
 # Installation
 
 ### 1. Create a virtual enviroment
