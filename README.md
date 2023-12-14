@@ -1,7 +1,7 @@
 ### An easy way to scrape scientifc publication from Arxiv and visualize them
 
 
-![Alt Text](exampleNetwork.gif)
+![Alt Text](exampleNetwork.png)
 
 
 # Installation
