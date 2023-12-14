@@ -1,0 +1,13 @@
+arxiv
+matplotlib
+networkx
+numpy
+pandas
+pyvis
+PyPDF2
+refextract
+ipykernel
+PyQt5
+libmagic
+python-magic-bin==0.4.14
+openpyxl
