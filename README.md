@@ -35,7 +35,7 @@ python main.py --input Physics_Informed_Machine_learning, PINN, PIML --cutoff 20
 make sure to use "_" instead of a space. Also make sure to include a folder called "papers" in the repository before using it.
 
 # Results
-This will create three files and a folder:
+This will create three files:
 
 1. "Network.html" : Open this file with your browser to see a visual representation of all the papers
    
@@ -49,5 +49,5 @@ This will create three files and a folder:
 2. "Overview.xlsx" : To see a summary of all the articles. columns = ['Authors', 'Title', 'Date', 'Summary', 'URL', 'Query']
 
 3. "PublicationFrequency.png" : A histogram of the frequency of articles versus the years.
-4. In the doler "papers" you will find all corresponding pdfs.
+4. In the folder "papers" you will find all corresponding pdfs.
 
