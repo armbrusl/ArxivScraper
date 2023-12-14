@@ -1,4 +1,4 @@
-### An easy way to scrape scientifc publication from Arxiv and visualize them
+### An Easy Way to Scrape Scientifc Publications from Arxiv and Visualize their Connectivity
 
 
 ![Alt Text](exampleNetwork.png)
