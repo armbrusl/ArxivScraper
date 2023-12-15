@@ -4,6 +4,9 @@ import re
 import os
 from os.path import exists
 import argparse
+import os
+from datetime import datetime
+
 
 import networkx as nx
 import matplotlib.pyplot as plt
@@ -16,6 +19,33 @@ from refextract import extract_references_from_file
 
 client = arxiv.Client()
 
+def createExcel(filefolder, all_data):
+    df = pd.DataFrame(all_data, columns = ['Authors', 'Title', 'Date', 'Summary', 'URL', 'Query']) 
+    df = df.sort_values('Date', ascending=False)
+    df.to_excel(filefolder + "/Overview.xlsx")
+    print("Created Excel Sheet")
+    
+    return df
+
+def createDirectory():
+    # Get current date and time
+    current_datetime = datetime.now()
+    date_time_str = current_datetime.strftime("%Y-%m-%d_%H-%M-%S")  # Format: YYYY-MM-DD_HH-MM-SS
+
+    # Create a folder based on current date and time
+    folder_name = "search" + date_time_str
+    os.mkdir(folder_name)
+
+    # Create 'papers' and 'references' folders within the newly created folder
+    papers_folder = os.path.join(folder_name, 'papers')
+    references_folder = os.path.join(folder_name, 'references')
+
+    os.mkdir(papers_folder)
+    os.mkdir(references_folder)
+
+    print(f"Folders created: {folder_name}, {papers_folder}, {references_folder}")
+    
+    return folder_name
 
 def flatten_extend(matrix):
     flat_list = []
@@ -44,7 +74,7 @@ def check_file(fullfile):
         except Exception as e:
             return False
 
-def SearchArxiv(queries, nresults, cutoffDate):
+def SearchArxiv(queries, nresults, cutoffDate, filefolder):
     all_data = []
     names_list = []
     title_list = []
@@ -58,11 +88,12 @@ def SearchArxiv(queries, nresults, cutoffDate):
             sort_by = arxiv.SortCriterion.Relevance,
             sort_order = arxiv.SortOrder.Descending
         )
-        
+        print("Done Scraping Arxiv")
         results = client.results(search)
         
+
+        print("Analyzing Results")
         for result in results:
-            
             temp = ["","","","","",""]
             names = re.findall(r"'(.*?)'", str(result.authors))
             
@@ -74,10 +105,9 @@ def SearchArxiv(queries, nresults, cutoffDate):
             temp[4] = result.pdf_url
             temp[5] = query
 
-            print(temp[2])
             if(int(str(temp[2])[:4]) > cutoffDate and title_list.count(temp[1]) <= 0):
                 
-                filename = "papers/" + "".join(x for x in temp[1] if x.isalnum() or x == " " or x== "-") + ".pdf"
+                filename = filefolder + "/papers/" + "".join(x for x in temp[1] if x.isalnum() or x == " " or x== "-") + ".pdf"
                 
                 if(exists(filename) == False):
                     result.download_pdf(filename=filename)
@@ -107,7 +137,7 @@ def SearchArxiv(queries, nresults, cutoffDate):
                 
     return all_data, names_list, title_list, references
 
-def createAuthorNetwork(names_list, title_list, df, cutoffDate, wf):
+def createAuthorNetwork(names_list, title_list, df, cutoffDate, wf, filefolder):
 
     # Create a graph
     G = nx.Graph()
@@ -156,36 +186,38 @@ def createAuthorNetwork(names_list, title_list, df, cutoffDate, wf):
     
     net.toggle_physics(True)
     #net.show_buttons(filter_=['physics'])
-    net.save_graph("Network.html")   
+    net.save_graph(filefolder + "/Network.html") 
+    print("Done Creating Network Plot")
     
-def createDateHistogram(dates):
-
+       
+def createDateHistogram(dates, filefolder, cutoff):
+    current_year = datetime.now().year
+    
     # Create a histogram of dates
     plt.figure(figsize=(10, 6))
-    plt.hist(dates, bins=60, edgecolor='black')  # Adjust the number of bins as needed
+    plt.hist(dates, bins=int((current_year - cutoff)*12), edgecolor='black')  # Adjust the number of bins as needed
     plt.xlabel('Date')
     plt.ylabel('Frequency')
     plt.title('Histogram of Dates')
     plt.xticks(rotation=45)  # Rotate x-axis labels for better readability
     plt.tight_layout()
-    plt.savefig("PublicationFrequency.png")
+    plt.savefig(filefolder + "/PublicationFrequency.png")
+    print("Done Creating Network Plot")
 
 
-def main(input, cutoffDate, maxNumberOfPapers):
+def main(input, cutoffDate, maxNumberOfPapers): 
     
     queries = [f"abs:{query} AND ti:{query}" for query in input]
 
-    print(queries, cutoffDate, maxNumberOfPapers)
+    filefolder = createDirectory()
+    
+    
+    all_data, names_list, title_list, references = SearchArxiv(queries, maxNumberOfPapers, cutoffDate, filefolder)
+    print("Done Analyzing Results")
 
-    all_data, names_list, title_list, references = SearchArxiv(queries, maxNumberOfPapers, cutoffDate)
-
-
-    df = pd.DataFrame(all_data, columns = ['Authors', 'Title', 'Date', 'Summary', 'URL', 'Query']) 
-    df = df.sort_values('Date', ascending=False)
-    df.to_excel("Overview.xlsx")
-
-    createAuthorNetwork(names_list, title_list, df, cutoffDate, 0.5)
-    createDateHistogram(list(df.Date))
+    df = createExcel(filefolder, all_data)
+    createAuthorNetwork(names_list, title_list, df, cutoffDate, 0.5, filefolder)
+    createDateHistogram(list(df.Date), filefolder, cutoffDate)
     
     
     
@@ -200,5 +232,4 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     queries = args.input.replace("_", " ").split(",")
-
     main(queries, args.cutoff, args.max)
