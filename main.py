@@ -19,9 +19,6 @@ import webbrowser
 from PyPDF2 import PdfReader
 from refextract import extract_references_from_file
 
-client = arxiv.Client()
-
-
 
 
 class Scraper():
@@ -109,7 +106,8 @@ class Scraper():
                 sort_by = arxiv.SortCriterion.Relevance,
                 sort_order = arxiv.SortOrder.Descending
             )
-            
+
+            client = arxiv.Client()
             
             for result in client.results(search):
                 
