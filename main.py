@@ -1,19 +1,6 @@
 import argparse
 from datetime import datetime
 
-
-import networkx as nx
-import matplotlib.pyplot as plt
-import matplotlib
-matplotlib.use('Qt5Agg')
-from pyvis.network import Network
-import tkinter as tk
-import webbrowser
-
-from PyPDF2 import PdfReader
-from refextract import extract_references_from_file
-
-
 from Scraper import Scraper
 
 if __name__ == "__main__":
