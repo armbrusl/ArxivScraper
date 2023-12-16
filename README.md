@@ -16,7 +16,7 @@ Scripts/activate
 
 ### 2. Download the requirements
 
-#### Navigate to the cloned GitHub repository and run
+Navigate to the cloned GitHub repository and run
 
 ```
 pip install -r requirements.txt
@@ -28,15 +28,18 @@ pip install -r requirements.txt
 python main.py --input<inputs_separated_by_commas>(string) --range <earliest_latest>(yyyymmdd_yymmdd) --max <max_number_of_articles>(int)
 ```
 
-#### Examples:
+### Examples:
 
-Only a lowe bound on the date:
-```
-python main.py --input Physics_Informed_Machine_learning,PINN,PIML --range 20180101 --max 100
-```
+Upper and lower bound on the date:
 ```
 python main.py --input PINN,PIML --range 20180101_20220501 --max 20
 ```
+
+Only a lower bound on the date:
+```
+python main.py --input Physics_Informed_Machine_learning,PINN,PIML --range 20180101 --max 100
+```
+
 No restrictions in the range:
 ```
 python main.py --input PIML --max 100
