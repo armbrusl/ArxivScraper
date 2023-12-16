@@ -25,14 +25,25 @@ pip install -r requirements.txt
 # Usage
 
 ```
-python main.py --input<inputs_separated_by_commas>(string) --cutoff <earliest_year>(int) --max <max_number_of_articles>(int)
+python main.py --input<inputs_separated_by_commas>(string) --range <earliest_latest>(yyyymmdd_yymmdd) --max <max_number_of_articles>(int)
 ```
 
-#### Example:
+#### Examples:
+
+Only a lowe bound on the date:
 ```
-python main.py --input Physics_Informed_Machine_learning, PINN, PIML --cutoff 2018 --max 100
+python main.py --input Physics_Informed_Machine_learning,PINN,PIML --range 20180101 --max 100
 ```
-make sure to use "_" instead of a space. Also make sure to include a folder called "papers" in the repository before using it.
+```
+python main.py --input PINN,PIML --range 20180101_20220501 --max 20
+```
+No restrictions in the range:
+```
+python main.py --input PIML --max 100
+```
+
+make sure to use "_" instead of a space. Also make sure to include a folder called "papers" in the repository before using it. Furthermore it appears that the Arxiv serveres only allow a limited number of searched from a certain IP address in a windows of time. So if the search does not result in any publications being downloaded this might be the issue. Furthermore if the <max_number_of_articles> is too small and the daterange <earliest_latest> is too small there might be issues with getting results. <br />
+note: All the arxiv articles are sorted by relevance.
 
 # Results
 This will create three files:
