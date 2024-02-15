@@ -1,5 +1,3 @@
-### An Easy Way to Scrape Scientifc Publications from Arxiv and Visualize their Connectivity
-
 
 ![Alt Text](exampleNetwork.png)
 
