@@ -127,14 +127,14 @@ class Scraper():
                         
                         result.download_pdf(filename = cleanedTitle)
 
-                        if self.checkDownloadability(cleanedTitle):             
-                            temp[6] = extract_references_from_file(cleanedTitle)
+                        if self.checkDownloadability(cleanedTitle):         
+                            #temp[6] = extract_references_from_file(str(cleanedTitle))
                             self.saveCurrentPaper(temp)
                         else:
                             print("Corrupted File Deleted: (" + str(temp[2]) + ") " + temp[1])
                             #os.remove(cleanedTitle)
                     else:
-                        temp[6] = extract_references_from_file(cleanedTitle)               
+                        #temp[6] = extract_references_from_file(str(cleanedTitle))              
                         self.saveCurrentPaper(temp)
 
         print("Done Analyzing Results", "\n")
@@ -183,9 +183,12 @@ class Scraper():
         net.from_nx(G)
         net.toggle_physics(True)
         net.save_graph(self.foldername + "/Network.html") 
-        print("Done Creating Network Plot. Redirecting to Browser (carefull with Safari).")
-        webbrowser.open_new(os.path.abspath(self.foldername + "/Network.html"))
-           
+        print("Done Creating Network Plot.")
+        
+        # This will open up the created html file automatically
+        # webbrowser.open_new(os.path.abspath(self.foldername + "/Network.html"))
+        # print("Redirecting to Browser (carefull with Safari).")
+        
     def createDateHistogram(self):
         nBins = int(abs(((self.latestDate - self.earliestDate).days)) / 365.25 * 12) # Adjust the number of bins based on the search window
         
@@ -200,7 +203,6 @@ class Scraper():
         plt.savefig(self.foldername + "/PublicationFrequency.png")
         print("Done Creating Histogram Plot")
 
-    
     def cosineSimilarity(self):
         # Create TF-IDF vectorizer
         print("Begin Analyzing Similarities")

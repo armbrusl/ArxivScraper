@@ -1,6 +1,5 @@
 import argparse
 from datetime import datetime
-
 from Scraper import Scraper
 
 if __name__ == "__main__":
