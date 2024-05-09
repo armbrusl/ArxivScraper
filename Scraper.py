@@ -6,17 +6,14 @@ from os.path import exists
 import os
 from datetime import datetime
 import numpy as np
-
 import networkx as nx
 import matplotlib.pyplot as plt
 import matplotlib
 matplotlib.use('Qt5Agg')
 from pyvis.network import Network
 import webbrowser
-
 from PyPDF2 import PdfReader
 from refextract import extract_references_from_file
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -30,13 +27,14 @@ class Scraper():
         if len(dates) == 1:
             dates.append(datetime.now().strftime("%Y%m%d"))
         
-        self.queries        = queries
-        self.earliestDate   = datetime.strptime(dates[0], '%Y%m%d').date()
-        self.latestDate     = datetime.strptime(dates[1], '%Y%m%d').date()
-        self.maxPapers      = args.max
-        
-        self.foldername     = self.createDirectory()
-        self.allData = {'authors' :[], 'title':[], 'date':[], 'summary':[], 'url':[], 'query':[], 'references':[]}
+        self.queries      = queries
+        self.earliestDate = datetime.strptime(dates[0], '%Y%m%d').date()
+        self.latestDate   = datetime.strptime(dates[1], '%Y%m%d').date()
+        self.maxPapers    = args.max
+        self.nMostSimilar = args.mostS
+        self.downloadPDF  = args.savePDF
+        self.foldername   = self.createDirectory()
+        self.allData      = {'authors' :[], 'title':[], 'date':[], 'summary':[], 'url':[], 'query':[], 'references':[]}
         
         print("Queries: "      , self.queries)
         print("Earliest Date: ", self.earliestDate)
@@ -96,6 +94,7 @@ class Scraper():
         print("Saved: (" + str(temp[2]) + ") " + temp[1])
               
     def searchArxiv(self):
+        
         print("Ingesting Found Publications")
         for query in self.queries:
 
@@ -122,19 +121,24 @@ class Scraper():
                 if self.earliestDate < temp[2] < self.latestDate and self.allData['title'].count(temp[1]) == 0:
 
                     cleanedTitle = self.foldername + "/papers/" + "".join(x for x in temp[1] if x.isalnum() or x == " " or x== "-") + ".pdf"
-                    
+
                     if exists(cleanedTitle) == False:
                         
-                        result.download_pdf(filename = cleanedTitle)
-
-                        if self.checkDownloadability(cleanedTitle):         
-                            #temp[6] = extract_references_from_file(str(cleanedTitle))
+                        # Downloading the PDF
+                        if self.downloadPDF == True:
+                            result.download_pdf(filename = cleanedTitle)
+                        
+                        if self.checkDownloadability(cleanedTitle):  
+                            
+                            # Extracting the References from the academic paper
+                            # temp[6] = extract_references_from_file(cleanedTitle)
                             self.saveCurrentPaper(temp)
                         else:
                             print("Corrupted File Deleted: (" + str(temp[2]) + ") " + temp[1])
                             #os.remove(cleanedTitle)
-                    else:
-                        #temp[6] = extract_references_from_file(str(cleanedTitle))              
+                    else: 
+                        # Extracting the References from the academic paper
+                        # temp[6] = extract_references_from_file(cleanedTitle)          
                         self.saveCurrentPaper(temp)
 
         print("Done Analyzing Results", "\n")
@@ -218,9 +222,28 @@ class Scraper():
             print("Done Analyzing Similarities")
             np.save(self.foldername + "/similarities.npy", similarities)
             
-            plt.figure(figsize=(20, 20))
-            plt.imshow(similarities)
-            plt.colorbar()
+            similarities[similarities >= 0.99] = 0
+            plt.figure(figsize=(8, 8))
+            plt.imshow((10*similarities)**2, cmap='afmhot')
+            plt.colorbar(shrink=0.75)
             plt.savefig(self.foldername + "/similarities.png")
+            
+            
+            # This cycles through the similarities and finds the most compatible abstracts
+            
+            for _ in range(1, self.nMostSimilar):
+                most_similar = np.where(similarities == np.max(similarities))
+
+                if len(most_similar) > 1:
+                    most_similar = most_similar[0]
+ 
+                print(f"Similarity between articles #{_:>3} with similarity {similarities[most_similar[0], most_similar[1]]}")
+                print(self.allData['title'][most_similar[0]] + " --WITH-- " + self.allData['title'][most_similar[1]])
+                similarities[most_similar[0], most_similar[1]] = 0
+                
+            
         else:
             print("Not Enough Data to Make Similarity Calculations")
+            
+
+
